@@ -8,7 +8,7 @@ Claude calls a remote MCP server running in your own Cloudflare account. The ser
 
 **Get started:** create a free Cloudflare account and connect GitHub to it first ([steps](docs/setup.md#one-click-setup)), then click the button above, choose a random owner code of 12+ characters, and open your server's address to follow its four setup steps. About 5 minutes, on a free Cloudflare account. Full guide, including Google Drive storage: [docs/setup.md](docs/setup.md).
 
-**Status:** early (v0.2). Works today with Claude on the web, iPhone and Android, and with MCP clients such as Claude Code, Cursor, Gemini CLI and Codex.
+**Status:** early (v0.2). Built and tested for Claude: on the web, iPhone and Android, and in Claude Code. Other MCP clients that support remote servers with OAuth should be able to connect, but are untested.
 
 ## How your memories stay yours
 
