@@ -18,14 +18,14 @@ const release = `{
 const deployed = `{
 	"name": "my-memory",
 	"main": "src/index.ts",
-	"kv_namespaces": [{ "binding": "OAUTH_KV","id": "4c3e586cf1f44c02a438565900799fab" }],
-	"d1_databases": [{ "binding": "DB", "database_name": "ownmemory","database_id": "ebab74a6-17a2-4e7b-ac35-f73783ef3281" }],
+	"kv_namespaces": [{ "binding": "OAUTH_KV","id": "0123456789abcdef0123456789abcdef" }],
+	"d1_databases": [{ "binding": "DB", "database_name": "ownmemory","database_id": "00000000-1111-2222-3333-444444444444" }],
 	"vars": { "STORAGE": "d1" }
 }`;
 
 test("an update keeps the server's name and resource ids", () => {
 	const merged = mergeWrangler(deployed, release);
-	assert.deepEqual(ownValues(merged), { name: "my-memory", kvId: "4c3e586cf1f44c02a438565900799fab", dbId: "ebab74a6-17a2-4e7b-ac35-f73783ef3281" });
+	assert.deepEqual(ownValues(merged), { name: "my-memory", kvId: "0123456789abcdef0123456789abcdef", dbId: "00000000-1111-2222-3333-444444444444" });
 	assert.match(merged, /"observability": \{ "enabled": true \}/, "new settings come through");
 	assert.equal(mergeWrangler(merged, release), merged, "running it again changes nothing");
 });
