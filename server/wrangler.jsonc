@@ -27,6 +27,7 @@
 	//   BLOCKED_CATEGORIES  categories never saved, e.g. "health,finance" (optional)
 	//   WRITES_PAUSED       "true" stops all saves, updates and deletes (optional)
 	//   SEMANTIC_SEARCH     "off" to use keyword search only (optional)
+	//   UPDATE_CHECK        "off" to stop checking GitHub for new releases (optional)
 	//   PUBLIC_URL          custom domain, e.g. "https://mcp.example.com" (optional)
 	// Logs record requests, never memory contents: the code logs no request data.
 	"observability": { "enabled": true }

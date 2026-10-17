@@ -56,6 +56,8 @@ If you chose Google Drive storage, Google stores the encrypted files. OwnMemory 
 
 We don't run your server and can't reach it. It has no telemetry and never contacts us; we only see download counts on GitHub.
 
+To tell you when a new version is out, your server asks GitHub's public API for the latest OwnMemory release, at most twice a day. That request carries nothing about you or your memories, and it goes to GitHub, not to us. To stop it, set the `UPDATE_CHECK` secret to `off`.
+
 Updates are the exception: an update is new code that runs on your server and sees the key like the current code does. Your server updates only when you run the **Update OwnMemory** workflow (or if you turned on its weekly schedule). Every release is public on GitHub, so you, or anyone, can read what changed before installing it.
 
 ### Someone trying to sign in to your server

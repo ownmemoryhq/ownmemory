@@ -14,6 +14,7 @@ import { assertKeyInfo } from "../public/keys.js";
 import { type GateState, gateRoutes, manageRoutes } from "./gate";
 import { DRIVE_SCOPE, Drive, DriveError, exchangeCode, googleAuthorizeUrl, readIdToken } from "./google";
 import { DriveStorage, type Storage, readKeyInfo } from "./storage";
+import { UPDATING_GUIDE, availableUpdate } from "./updates";
 import {
 	UserFacingError,
 	allowedEmails,
@@ -293,6 +294,13 @@ memoriesApp.delete("/files/:id", async (c) => {
 	if (stale) return c.json({ error: stale.error }, stale.status);
 	await storage.remove(c.req.param("id"));
 	return c.json({ ok: true });
+});
+
+// A newer OwnMemory release, for the notice under the account bar. Signed-in only: the public
+// home page doesn't say whether the server is out of date.
+memoriesApp.get("/update", async (c) => {
+	await loadSession(c.env, c.req.raw);
+	return c.json({ update: await availableUpdate(c.env).catch(() => null), guide: UPDATING_GUIDE });
 });
 
 // Apps connected to this server (Claude on each account or device), and disconnecting them.

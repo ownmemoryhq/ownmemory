@@ -154,6 +154,7 @@ export function memoriesPage(d1: boolean) {
 <p class="note" id="account-status">Signed in</p>
 <button type="button" class="secondary" id="lock">Sign out</button>
 </div>
+<p class="update-notice" id="update-notice" role="status" hidden></p>
 
 <details class="section" id="connections">
 <summary><span class="section-title">Connected apps</span><span class="count" id="connections-count"></span></summary>

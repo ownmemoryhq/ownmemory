@@ -474,6 +474,14 @@ img.qr {
 	margin-top: 16px;
 }
 
+.update-notice {
+	margin: 0 0 16px;
+	padding: 10px 14px;
+	border: 1px solid var(--accent);
+	border-radius: 10px;
+	font-size: 0.95rem;
+}
+
 .account-bar .note {
 	margin: 0;
 	overflow-wrap: anywhere;

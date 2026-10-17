@@ -14,6 +14,7 @@ export interface Settings {
 	snoozeUntil?: string; // ISO date-time; no reminders before this
 	lastNudge?: string; // YYYY-MM-DD of the last progress line or question
 	lastCatchUp?: string; // YYYY-MM-DD of the last request to copy over built-in memories
+	updateNotified?: string; // the newest release Claude has already told the user about
 }
 
 export const RAMP_DAYS = 14;

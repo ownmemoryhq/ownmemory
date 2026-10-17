@@ -46,3 +46,12 @@ test("catch-up runs once a day while Claude's memory is on, never in OwnMemory o
 	assert.equal(catchUpDue(applyChoice(s, "keep_both", day(1)), day(1), 3), true);
 	assert.equal(catchUpDue(applyChoice(s, "ownmemory_only", day(1)), day(1), 3), false);
 });
+
+test("release versions compare by number, not as text", async () => {
+	const { newer } = await import("../src/updates.ts");
+	assert.equal(newer("0.2.10", "0.2.9"), true);
+	assert.equal(newer("0.3.0", "0.2.9"), true);
+	assert.equal(newer("1.0", "0.9.9"), true);
+	assert.equal(newer("0.2.2", "0.2.2"), false);
+	assert.equal(newer("0.2.1", "0.2.2"), false);
+});

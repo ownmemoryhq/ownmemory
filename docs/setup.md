@@ -140,7 +140,7 @@ Categories: `profile`, `preference`, `work`, `project`, `relationship`, `health`
 
 ## Updating your server
 
-New versions are published as [releases](https://github.com/ownmemoryhq/ownmemory/releases). Your server doesn't update by itself: you choose when new code runs on the server that holds your memory key.
+New versions are published as [releases](https://github.com/ownmemoryhq/ownmemory/releases). Your memories page shows when one is out, and Claude mentions it once per release. (The server checks GitHub's public API at most twice a day; set the `UPDATE_CHECK` secret to `off` to stop it.) Your server doesn't update by itself: you choose when new code runs on the server that holds your memory key.
 
 **One-click setup:** in GitHub, open your copy of the code (the private repository the deploy button created, usually `your-name/ownmemory`) → **Actions** → **Update OwnMemory** → **Run workflow**. It brings in the latest release and commits it; Cloudflare then redeploys your server in about a minute. Your memories, passphrase, sign-in methods and connected apps stay as they are, and your Worker's name and database ids are kept. If GitHub asks you to enable Actions for the repository first, allow it.
 

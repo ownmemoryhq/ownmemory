@@ -20,6 +20,8 @@ declare namespace Cloudflare {
 		AI?: Ai;
 		/** "off" disables meaning-based search, so memory text is never sent to Workers AI. */
 		SEMANTIC_SEARCH?: string;
+		/** "off" stops the twice-daily check of GitHub for a newer OwnMemory release. */
+		UPDATE_CHECK?: string;
 		/** Public origin, e.g. https://mcp.example.com. Defaults to the request's origin. */
 		PUBLIC_URL?: string;
 	}

@@ -33,6 +33,7 @@ import {
 } from "./settings";
 import { D1Storage, DriveStorage } from "./storage";
 import { MemoryStore } from "./store";
+import { UPDATING_GUIDE, VERSION, availableUpdate } from "./updates";
 import { ownerCodeHash } from "./web";
 
 const INSTRUCTIONS = `OwnMemory is the user's long-term memory, stored encrypted in storage they own.
@@ -191,7 +192,7 @@ function modeBriefing(settings: Settings, count: number, now: Date): { lines: st
 const category = z.enum(CATEGORIES);
 
 export function createServer() {
-	const server = new McpServer({ name: "OwnMemory", version: "0.2.2" }, { instructions: INSTRUCTIONS });
+	const server = new McpServer({ name: "OwnMemory", version: VERSION }, { instructions: INSTRUCTIONS });
 
 	server.registerTool(
 		"load_core_memories",
@@ -204,13 +205,26 @@ export function createServer() {
 		async () => {
 			const store = await openStore();
 			const now = new Date();
-			const [{ memories }, { settings, fileId }] = await Promise.all([store.all(), store.settings(now)]);
+			const [{ memories }, { settings, fileId }, update] = await Promise.all([
+				store.all(),
+				store.settings(now),
+				availableUpdate(env).catch(() => null),
+			]);
 			const { lines, nudged } = modeBriefing(settings, memories.length, now);
 			const catchUp = catchUpDue(settings, now, memories.length);
 			if (catchUp) lines.push(CATCH_UP);
-			if (nudged || catchUp) {
-				const marked = nudged ? markNudged(settings, now) : settings;
-				await store.saveSettings(fileId, catchUp ? markCaughtUp(marked, now) : marked);
+			// Each new release is mentioned once.
+			const announce = update && settings.updateNotified !== update.latest;
+			if (announce) {
+				lines.push(
+					`Pass this on briefly at a natural point in your reply: "OwnMemory ${update.latest} is available; your server runs ${update.current}. What's new: ${update.url}. How to update: ${UPDATING_GUIDE}"`,
+				);
+			}
+			if (nudged || catchUp || announce) {
+				let next = nudged ? markNudged(settings, now) : settings;
+				if (catchUp) next = markCaughtUp(next, now);
+				if (announce) next = { ...next, updateNotified: update.latest };
+				await store.saveSettings(fileId, next);
 			}
 			if (settings.mode === "ownmemory_only") {
 				const sorted = newestFirst(memories);

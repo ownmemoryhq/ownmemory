@@ -83,6 +83,26 @@ function enterAccount(email) {
 	$("account-status").textContent = email ? `Signed in as ${email}` : "Signed in";
 	showConnections();
 	if (d1) manage($("security"), needSignIn, (n) => count("security-count", String(n)));
+	showUpdate();
+}
+
+/** "A new version is available", when the server knows of a newer release. */
+async function showUpdate() {
+	const notice = $("update-notice");
+	try {
+		const { update, guide } = await api("GET", "/memories/update");
+		if (!update) return;
+		const link = (href, text) => Object.assign(document.createElement("a"), { href, textContent: text, target: "_blank", rel: "noopener" });
+		notice.replaceChildren(
+			`OwnMemory ${update.latest} is available; this server runs ${update.current}. `,
+			link(update.url, "What's new"),
+			" · ",
+			link(guide, "How to update"),
+		);
+		notice.hidden = false;
+	} catch {
+		// No notice: the check is best-effort.
+	}
 }
 
 /** Signed in, but there's no memory key yet. */
@@ -204,6 +224,7 @@ function lock(signOut = true) {
 	$("new-memory").replaceChildren();
 	$("security")?.replaceChildren();
 	$("download-warning").hidden = true;
+	$("update-notice").hidden = true;
 	$("connections-list").replaceChildren();
 	for (const id of ["connections-count", "security-count", "memories-count"]) count(id, "");
 	for (const id of ["connections", "security-section"]) if ($(id)) $(id).open = false;
