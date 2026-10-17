@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { applyChoice, markNudged, newSettings, parseSettings, rampStatus } from "../src/settings.ts";
+import { applyChoice, catchUpDue, markCaughtUp, markNudged, newSettings, parseSettings, rampStatus } from "../src/settings.ts";
 
 const day = (n) => new Date(Date.parse("2026-10-01T09:00:00Z") + n * 86_400_000);
 
@@ -34,4 +34,15 @@ test("keep both and OwnMemory only stop all nudges; ramp_up restarts", () => {
 test("damaged settings fall back to a fresh ramp-up", () => {
 	assert.equal(parseSettings('{"v":1,"mode":"bogus"}', day(0)).mode, "ramp_up");
 	assert.equal(parseSettings('{"v":1,"mode":"keep_both","rampStart":"2026-10-01T00:00:00Z"}', day(0)).rampDays, 14);
+});
+
+test("catch-up runs once a day while Claude's memory is on, never in OwnMemory only", () => {
+	let s = newSettings(day(0));
+	assert.equal(catchUpDue(s, day(0), 0), false); // empty: offer an import instead
+	assert.equal(catchUpDue(s, day(0), 3), true);
+	s = markCaughtUp(s, day(0));
+	assert.equal(catchUpDue(s, day(0), 3), false);
+	assert.equal(catchUpDue(s, day(1), 3), true);
+	assert.equal(catchUpDue(applyChoice(s, "keep_both", day(1)), day(1), 3), true);
+	assert.equal(catchUpDue(applyChoice(s, "ownmemory_only", day(1)), day(1), 3), false);
 });

@@ -46,7 +46,7 @@ export function htmlResponse(html: string, headers?: Headers, status = 200) {
 
 /** The text the owner pastes into "Instructions for Claude"; Claude ignores the connector without it. */
 export const CLAUDE_INSTRUCTIONS =
-	"I use the OwnMemory connector as my long-term memory. At the start of every conversation, before replying, call OwnMemory's load_core_memories and follow what it says. Whenever you learn something durable about me (who I am, my preferences, decisions, projects, people in my life), save it with OwnMemory's save_memory, even if you also use your built-in memory. Search OwnMemory before answering anything that depends on my history or preferences.";
+	"I use the OwnMemory connector as my long-term memory. At the start of every conversation, before replying, call OwnMemory's load_core_memories and follow what it says. Whenever you learn something durable about me (who I am, my preferences, decisions, projects, people in my life), save it with OwnMemory's save_memory. Every time you update your built-in memory, also save the same fact to OwnMemory in the same reply. Search OwnMemory before answering anything that depends on my history or preferences.";
 
 /** The setup wizard: everything the owner does after deploying, in order. */
 export function homePage(origin: string, d1: boolean, ownerCodeOk = true) {

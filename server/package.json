@@ -1,6 +1,6 @@
 {
   "name": "ownmemory",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "OwnMemory: Claude remembers you across chats and devices, with memories encrypted under a key only you hold, in storage you own.",
   "scripts": {
     "dev": "wrangler dev",

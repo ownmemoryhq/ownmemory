@@ -113,6 +113,8 @@ Claude has a built-in memory (Settings → Capabilities → Memory). OwnMemory w
 | OwnMemory only | Off | Your only memory: Claude loads and searches it |
 | Keep both | On | Saves a copy of every new fact, with no reminders |
 
+While Claude's memory is on, Claude sometimes saves a fact only there (Claude shows "Memory updated" either way). To catch those, once a day Claude copies what its memory knows into OwnMemory; facts already saved are skipped.
+
 After 14 days (and at least 20 memories), Claude asks whether you'd like to turn off its built-in memory. Answer "turned it off", "not yet" (asks again in 7 days) or "keep both" (no more reminders). Change your mind any time by telling Claude, for example "I've turned off Claude's memory" or "restart the OwnMemory ramp-up".
 
 Then try it: tell Claude something about yourself, start a new chat, and ask what it remembers.
@@ -145,6 +147,8 @@ New versions are published as [releases](https://github.com/ownmemoryhq/ownmemor
 To update automatically every Monday instead, edit `.github/workflows/update-ownmemory.yml` in your copy and remove the `#` from the two `schedule` lines.
 
 Servers deployed before v0.2.0 don't have the workflow yet: add it once by creating `.github/workflows/update-ownmemory.yml` in your copy with [this file's contents](https://github.com/ownmemoryhq/ownmemory/blob/main/server/.github/workflows/update-ownmemory.yml) (on GitHub: **Add file** → **Create new file**).
+
+When a release changes the **Instructions for Claude** text (its release notes say so), copy the new text from your server's home page and replace the old one in Claude's settings.
 
 **Deployed from a terminal:** `git pull` in your clone of this repository, then `npx wrangler deploy` in `server/`.
 

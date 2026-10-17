@@ -13,6 +13,7 @@ export interface Settings {
 	rampDays: number;
 	snoozeUntil?: string; // ISO date-time; no reminders before this
 	lastNudge?: string; // YYYY-MM-DD of the last progress line or question
+	lastCatchUp?: string; // YYYY-MM-DD of the last request to copy over built-in memories
 }
 
 export const RAMP_DAYS = 14;
@@ -48,6 +49,19 @@ export function rampStatus(s: Settings, now: Date, memoryCount: number): RampSta
 
 export function markNudged(s: Settings, now: Date): Settings {
 	return { ...s, lastNudge: now.toISOString().slice(0, 10) };
+}
+
+/**
+ * Whether to ask Claude to copy its built-in memories over today, catching any fact it saved
+ * only there. Once a day, while Claude's memory is on and OwnMemory already holds memories
+ * (an empty one gets an offer to import instead).
+ */
+export function catchUpDue(s: Settings, now: Date, memoryCount: number): boolean {
+	return s.mode !== "ownmemory_only" && memoryCount > 0 && s.lastCatchUp !== now.toISOString().slice(0, 10);
+}
+
+export function markCaughtUp(s: Settings, now: Date): Settings {
+	return { ...s, lastCatchUp: now.toISOString().slice(0, 10) };
 }
 
 export function applyChoice(s: Settings, choice: Choice, now: Date): Settings {

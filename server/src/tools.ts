@@ -21,7 +21,16 @@ import {
 import { Drive, refreshAccessToken } from "./google";
 import type { Props } from "./props";
 import { IMPORT_SAME_MEANING, REVIEW_SAME_MEANING, SAME_MEANING, Semantic, closest, cosine } from "./semantic";
-import { type Settings, RAMP_MIN_MEMORIES, SNOOZE_DAYS, applyChoice, markNudged, rampStatus } from "./settings";
+import {
+	type Settings,
+	RAMP_MIN_MEMORIES,
+	SNOOZE_DAYS,
+	applyChoice,
+	catchUpDue,
+	markCaughtUp,
+	markNudged,
+	rampStatus,
+} from "./settings";
 import { D1Storage, DriveStorage } from "./storage";
 import { MemoryStore } from "./store";
 import { ownerCodeHash } from "./web";
@@ -29,7 +38,7 @@ import { ownerCodeHash } from "./web";
 const INSTRUCTIONS = `OwnMemory is the user's long-term memory, stored encrypted in storage they own.
 
 1. At the start of every conversation, call load_core_memories once, before replying. It returns the user's memory mode, what to do in that mode, and any message to pass on to the user. Follow it.
-2. Save durable facts with save_memory as soon as you learn them, even if you also keep your own built-in memory: who the user is, their preferences, decisions, ongoing projects, people in their life, and anything they ask you to remember. One fact per memory, written as a standalone sentence that will make sense months from now. Before finishing each reply, check whether the user revealed such a fact.
+2. Save durable facts with save_memory as soon as you learn them, even if you also keep your own built-in memory: who the user is, their preferences, decisions, ongoing projects, people in their life, and anything they ask you to remember. One fact per memory, written as a standalone sentence that will make sense months from now. Before finishing each reply, check whether the user revealed such a fact. Each time you save or update a fact in your built-in memory, make the matching save_memory or update_memory call in the same reply: a built-in save never reaches OwnMemory on its own.
 3. Don't save small talk, one-off requests, things true only today, or anything the user asks you not to remember. Never save passwords, keys, card numbers or other credentials; the server refuses them.
 4. When a fact changes, update_memory the old one. save_memory tells you if a fact is already saved.
 5. To copy many facts at once, for example everything your built-in memory knows about the user, use import_memories.
@@ -130,6 +139,10 @@ async function tryMeaning<T>(fn: () => Promise<T>): Promise<T | null> {
 
 const MEMORY_SETTING = "Settings → Capabilities → Memory";
 
+// Once a day while Claude's memory is on: catches facts Claude saved only to its own memory.
+const CATCH_UP =
+	"Daily catch-up: call import_memories with every durable fact about the user in your built-in memory (up to 50 per call), so any fact saved only there reaches OwnMemory. Facts already in OwnMemory are skipped, so don't check first. Do it without asking, and mention it only if something was added, in one short line.";
+
 /** What load_core_memories tells Claude in each mode; returns whether a nudge was given. */
 function modeBriefing(settings: Settings, count: number, now: Date): { lines: string[]; nudged: boolean } {
 	if (settings.mode === "ownmemory_only") {
@@ -145,7 +158,7 @@ function modeBriefing(settings: Settings, count: number, now: Date): { lines: st
 		return {
 			lines: [
 				"Memory mode: keep both. Claude's built-in memory handles recall, so no memories are listed here.",
-				"Save every new durable fact to OwnMemory too, as the user's own copy. Don't mention OwnMemory's status unless the user asks.",
+				"Save every new durable fact to OwnMemory too, as the user's own copy. Each time you save or update a fact in your built-in memory, make the matching save_memory or update_memory call in the same reply: a built-in save never reaches OwnMemory on its own. Don't mention OwnMemory's status unless the user asks.",
 			],
 			nudged: false,
 		};
@@ -153,7 +166,7 @@ function modeBriefing(settings: Settings, count: number, now: Date): { lines: st
 	const { day, nudge } = rampStatus(settings, now, count);
 	const lines = [
 		`Memory mode: ramp-up, day ${day} of ${settings.rampDays}. Claude's built-in memory is still on and handles recall, so no memories are listed here.`,
-		"Save every new durable fact to OwnMemory as well, even when you also update your built-in memory.",
+		"Save every new durable fact to OwnMemory as well. Each time you save or update a fact in your built-in memory, make the matching save_memory or update_memory call in the same reply: a built-in save never reaches OwnMemory on its own.",
 	];
 	if (count === 0) {
 		lines.push(
@@ -178,7 +191,7 @@ function modeBriefing(settings: Settings, count: number, now: Date): { lines: st
 const category = z.enum(CATEGORIES);
 
 export function createServer() {
-	const server = new McpServer({ name: "OwnMemory", version: "0.2.0" }, { instructions: INSTRUCTIONS });
+	const server = new McpServer({ name: "OwnMemory", version: "0.2.1" }, { instructions: INSTRUCTIONS });
 
 	server.registerTool(
 		"load_core_memories",
@@ -193,7 +206,12 @@ export function createServer() {
 			const now = new Date();
 			const [{ memories }, { settings, fileId }] = await Promise.all([store.all(), store.settings(now)]);
 			const { lines, nudged } = modeBriefing(settings, memories.length, now);
-			if (nudged) await store.saveSettings(fileId, markNudged(settings, now));
+			const catchUp = catchUpDue(settings, now, memories.length);
+			if (catchUp) lines.push(CATCH_UP);
+			if (nudged || catchUp) {
+				const marked = nudged ? markNudged(settings, now) : settings;
+				await store.saveSettings(fileId, catchUp ? markCaughtUp(marked, now) : marked);
+			}
 			if (settings.mode === "ownmemory_only") {
 				const sorted = newestFirst(memories);
 				const core = sorted.filter((m) => CORE_CATEGORIES.includes(m.category)).slice(0, 50);
@@ -264,7 +282,7 @@ export function createServer() {
 		{
 			title: "Save a memory",
 			description:
-				"Saves one durable fact about the user to their encrypted memory, even if you also use your own built-in memory. Write it as a standalone sentence. Never include passwords, keys or card numbers.",
+				"Saves one durable fact about the user to their encrypted memory. Call it even when you also save the fact to your own built-in memory, which never copies it here. Write it as a standalone sentence. Never include passwords, keys or card numbers.",
 			inputSchema: z.object({
 				content: z.string().min(1).max(MAX_CONTENT).describe("The fact to remember, as a standalone sentence."),
 				category: category.describe(
