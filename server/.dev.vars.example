@@ -1,0 +1,11 @@
+# Secrets. The "Deploy to Cloudflare" button asks for each uncommented one; locally, copy
+# this file to .dev.vars (git ignores it). In production: `npx wrangler secret put <NAME>`.
+
+# A code only you know, at least 12 characters. You enter it whenever you connect Claude
+# or another app, and to download your memories.
+OWNER_CODE=
+
+# Only for Google Drive storage (set "STORAGE": "drive" in wrangler.jsonc):
+# GOOGLE_CLIENT_ID=
+# GOOGLE_CLIENT_SECRET=
+# ALLOWED_EMAILS=you@gmail.com

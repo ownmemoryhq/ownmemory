@@ -1,0 +1,8 @@
+// Evaluation Worker for npm run eval. Workers AI always runs remotely, even under wrangler dev.
+{
+	"name": "ownmemory-eval",
+	"main": "worker.ts",
+	"compatibility_date": "2026-09-01",
+	"compatibility_flags": ["nodejs_compat"],
+	"ai": { "binding": "AI" }
+}

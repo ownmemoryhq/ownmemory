@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decrypt my memories · OwnMemory</title>
+<meta name="description" content="Turn a downloaded copy of your OwnMemory memories back into readable Markdown, entirely in your browser, without your OwnMemory server.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="wrap top">
+<a class="brand" href="/" aria-label="OwnMemory home">
+<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="43" fill="none" stroke="currentColor" stroke-width="16"/><circle cx="69" cy="51" r="12" fill="var(--accent)"/></svg>
+<span><b>Own</b>Memory</span>
+</a>
+</header>
+
+<main class="wrap narrow">
+<h1 class="page-title">Decrypt my memories</h1>
+<p class="lead">Turn a downloaded copy of your memories back into readable Markdown files. This works without your OwnMemory server, for example if you deleted it.</p>
+
+<section class="panel">
+<h2>1. Download your OwnMemory folder</h2>
+<p>In Google Drive, right-click the <strong>OwnMemory</strong> folder and choose <strong>Download</strong>. Google gives you a zip file.</p>
+<p class="small">If your server still works, it's easier to open its <strong>/memories</strong> page and click <strong>Download all</strong>.</p>
+</section>
+
+<section class="panel">
+<h2>2. Decrypt it here</h2>
+<form id="decrypt-form" novalidate>
+<label for="files">The zip from Google Drive, or the files from the folder</label>
+<input id="files" name="files" type="file" multiple required accept=".zip,.omem,.json">
+<label for="secret">Passphrase or recovery key</label>
+<input id="secret" name="secret" type="password" autocomplete="current-password" required>
+<div class="warning" role="note">
+<strong>Your download won't be encrypted.</strong> Anyone who opens these files can read your memories. Keep them somewhere private, don't email or share them, and delete them when you're done.
+</div>
+<p class="status" role="alert"></p>
+<div class="actions"><button type="submit" class="button">Decrypt and download</button></div>
+</form>
+</section>
+
+<p class="small privacy">Everything happens on this page. Your files, passphrase and memories never leave your device: this page is not allowed to send anything over the network, and your browser enforces that.</p>
+</main>
+
+<footer class="wrap foot">
+<p>No sign-up, no cookies, no tracking. Security reports: <a href="mailto:security@ownmemory.app">security@ownmemory.app</a>.</p>
+<p>OwnMemory and the OwnMemory logo are trademarks of the OwnMemory project.</p>
+</footer>
+<script type="module" src="/decrypt.js"></script>
+</body>
+</html>

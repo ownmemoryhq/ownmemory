@@ -1,0 +1,44 @@
+{
+  "name": "ownmemory",
+  "version": "0.1.0",
+  "description": "OwnMemory: Claude remembers you across chats and devices, with memories encrypted under a key only you hold, in storage you own.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test test/*.test.mjs",
+    "decrypt": "node scripts/decrypt.mjs",
+    "eval": "node test/eval/run.mjs",
+    "sync-site": "cp public/keys.js public/memory-file.js public/zip.js ../site/public/",
+    "vendor": "cp node_modules/qrcode-generator/dist/qrcode.mjs public/vendor/qrcode.mjs"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@cloudflare/workers-oauth-provider": "^1.2.3",
+    "@modelcontextprotocol/server": "^2.3.1",
+    "@simplewebauthn/server": "14.0.3",
+    "agents": "^0.28.1",
+    "hono": "^4.13.13",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261014.1",
+    "qrcode-generator": "2.0.4",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.150.0"
+  },
+  "private": true,
+  "type": "module",
+  "cloudflare": {
+    "bindings": {
+      "OWNER_CODE": {
+        "description": "A code only you know, **at least 12 characters**: generate one in your password manager and keep it there. You enter it once, when you first connect, to set up a passkey or an authenticator app. After that it's only used together with your authenticator code, or to reset sign-in if you lose your devices."
+      }
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ownmemoryhq/ownmemory.git"
+  },
+  "homepage": "https://ownmemory.app"
+}

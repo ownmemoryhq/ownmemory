@@ -1,0 +1,33 @@
+// OwnMemory MCP server. Setup: ../docs/setup.md
+//
+// Defaults to one-click mode: memories in a D1 database in your own Cloudflare account,
+// sign-in with an owner code. For Google Drive storage, set "STORAGE" to "drive".
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "ownmemory",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-09-01",
+	// nodejs_compat: AsyncLocalStorage for the MCP handler.
+	// global_fetch_strictly_public: required when accepting Client ID Metadata Documents.
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	// Serves the page scripts and styles in public/; everything else reaches the Worker.
+	"assets": { "directory": "./public" },
+	// Holds OAuth grants (props encrypted per token) and ten-minute sign-in records.
+	// Created on first deploy (or by the deploy button), which fills in "id".
+	"kv_namespaces": [{ "binding": "OAUTH_KV" }],
+	// The encrypted memory files. Created on first deploy, like the KV namespace.
+	"d1_databases": [{ "binding": "DB", "database_name": "ownmemory" }],
+	"vars": { "STORAGE": "d1" },
+	// Search by meaning: embeddings from Workers AI in your account (free daily allowance).
+	// Set the SEMANTIC_SEARCH secret to "off" to never send memory text to it.
+	"ai": { "binding": "AI" },
+	// Secrets, set with `npx wrangler secret put <NAME>`:
+	//   OWNER_CODE          one-click mode: the code needed to connect a client (required)
+	//   GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, ALLOWED_EMAILS   Google Drive mode
+	//   BLOCKED_CATEGORIES  categories never saved, e.g. "health,finance" (optional)
+	//   WRITES_PAUSED       "true" stops all saves, updates and deletes (optional)
+	//   SEMANTIC_SEARCH     "off" to use keyword search only (optional)
+	//   PUBLIC_URL          custom domain, e.g. "https://mcp.example.com" (optional)
+	// Logs record requests, never memory contents: the code logs no request data.
+	"observability": { "enabled": true }
+}

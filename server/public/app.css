@@ -1,0 +1,553 @@
+:root {
+	--bg: #f7f8fa;
+	--card: #ffffff;
+	--ink: #12233f;
+	--muted: #4a5568;
+	--line: #d9dee7;
+	--accent: #c9731f;
+	--danger: #b42318;
+	--button-bg: #12233f;
+	--button-ink: #ffffff;
+	--code-bg: #f1f3f7;
+	color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--bg: #0c1729;
+		--card: #12233f;
+		--ink: #f4f6fa;
+		--muted: #c3cbd9;
+		--line: #2c3d5c;
+		--accent: #f0a94b;
+		--danger: #ff8a7a;
+		--button-bg: #f4f6fa;
+		--button-ink: #12233f;
+		--code-bg: #0c1729;
+		color-scheme: dark;
+	}
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	background: var(--bg);
+	color: var(--ink);
+	font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", sans-serif;
+}
+
+main {
+	max-width: 480px;
+	margin: 0 auto;
+	padding: 40px 16px 64px;
+}
+
+.brand {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 24px;
+	font-size: 22px;
+	letter-spacing: -0.4px;
+}
+
+.brand svg {
+	width: 32px;
+	height: 32px;
+}
+
+.brand b {
+	font-weight: 800;
+}
+
+.card {
+	background: var(--card);
+	border: 1px solid var(--line);
+	border-radius: 12px;
+	padding: 24px;
+}
+
+h1 {
+	font-size: 22px;
+	line-height: 1.3;
+	margin: 0 0 8px;
+}
+
+h2 {
+	font-size: 17px;
+	margin: 24px 0 6px;
+}
+
+a {
+	color: var(--ink);
+}
+
+p {
+	margin: 0 0 16px;
+	color: var(--muted);
+}
+
+p strong {
+	color: var(--ink);
+}
+
+label {
+	display: block;
+	font-weight: 600;
+	margin: 16px 0 6px;
+}
+
+input[type="password"],
+input[type="text"] {
+	width: 100%;
+	padding: 12px;
+	font: inherit;
+	color: var(--ink);
+	background: var(--bg);
+	border: 1px solid var(--line);
+	border-radius: 8px;
+}
+
+input:focus,
+button:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+
+.check {
+	display: flex;
+	gap: 10px;
+	align-items: flex-start;
+	font-weight: 400;
+}
+
+.check input {
+	margin-top: 5px;
+}
+
+.actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	margin-top: 24px;
+}
+
+button {
+	min-height: 44px;
+	padding: 10px 20px;
+	font: inherit;
+	font-weight: 600;
+	border-radius: 8px;
+	border: 1px solid var(--button-bg);
+	background: var(--button-bg);
+	color: var(--button-ink);
+	cursor: pointer;
+}
+
+button.secondary,
+button.link {
+	background: transparent;
+	color: var(--ink);
+	border-color: var(--line);
+}
+
+button.link {
+	border: none;
+	padding: 10px 0;
+	text-decoration: underline;
+}
+
+button:disabled {
+	opacity: 0.55;
+	cursor: default;
+}
+
+.error {
+	color: var(--danger);
+	min-height: 1.5em;
+	margin: 12px 0 0;
+}
+
+.code {
+	font: 600 18px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
+	letter-spacing: 1px;
+	word-break: break-all;
+	background: var(--code-bg);
+	border: 1px dashed var(--line);
+	border-radius: 8px;
+	padding: 16px;
+	margin: 8px 0 16px;
+	user-select: all;
+}
+
+.note {
+	font-size: 14px;
+}
+
+.mono {
+	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+	word-break: break-all;
+}
+
+.step h2 {
+	margin-top: 0;
+}
+
+.card + .card {
+	margin-top: 16px;
+}
+
+.code.prose {
+	font-family: inherit;
+	font-size: 15px;
+	line-height: 1.55;
+	letter-spacing: 0;
+	font-weight: 400;
+}
+
+input[type="file"] {
+	width: 100%;
+	font: inherit;
+	color: var(--ink);
+}
+
+/* The memories page */
+
+main.wide {
+	max-width: 760px;
+}
+
+textarea,
+select,
+input[type="search"] {
+	width: 100%;
+	padding: 12px;
+	font: inherit;
+	color: var(--ink);
+	background: var(--bg);
+	border: 1px solid var(--line);
+	border-radius: 8px;
+}
+
+textarea {
+	resize: vertical;
+	min-height: 96px;
+}
+
+textarea:focus,
+select:focus {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+
+a.button {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	padding: 10px 20px;
+	font-weight: 600;
+	border-radius: 8px;
+	background: var(--button-bg);
+	color: var(--button-ink);
+	text-decoration: none;
+}
+
+button.danger {
+	background: transparent;
+	color: var(--danger);
+	border-color: var(--danger);
+}
+
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+
+.toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 12px;
+}
+
+.toolbar input[type="search"] {
+	flex: 1 1 240px;
+	width: auto;
+}
+
+.toolbar select {
+	flex: 0 1 200px;
+	width: auto;
+}
+
+.toolbar .note {
+	flex: 1 1 auto;
+	margin: 0;
+}
+
+#library-error:empty {
+	display: none;
+}
+
+.memories {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.memory {
+	background: var(--card);
+	border: 1px solid var(--line);
+	border-radius: 12px;
+	padding: 16px 20px;
+	margin-top: 12px;
+}
+
+.memory h3 {
+	font-size: 16px;
+	margin: 0 0 4px;
+}
+
+.memory .content {
+	color: var(--ink);
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	margin: 0 0 8px;
+}
+
+.memory .meta {
+	font-size: 13px;
+	color: var(--muted);
+	margin: 0 0 8px;
+}
+
+.memory details {
+	font-size: 14px;
+	color: var(--muted);
+	margin-bottom: 4px;
+}
+
+.memory details ul {
+	margin: 8px 0 0;
+	padding-left: 18px;
+}
+
+.memory details li {
+	margin-bottom: 6px;
+	overflow-wrap: anywhere;
+}
+
+.memory.editing label:first-child {
+	margin-top: 0;
+}
+
+.chip {
+	display: inline-block;
+	padding: 1px 8px;
+	border-radius: 999px;
+	border: 1px solid var(--line);
+	color: var(--ink);
+	font-weight: 600;
+}
+
+.empty {
+	color: var(--muted);
+	padding: 24px 0;
+	text-align: center;
+}
+
+
+#library + .note,
+[data-panel] + .note {
+	margin-top: 24px;
+}
+
+.toolbar input[type="search"],
+.toolbar select {
+	align-self: stretch;
+}
+
+.memory.editing .note {
+	margin: 8px 0 0;
+}
+
+/* Sign-in step and sign-in methods */
+
+.choices {
+	margin: 0 0 8px;
+	padding-left: 20px;
+	color: var(--muted);
+}
+
+.choices li {
+	margin-bottom: 8px;
+}
+
+.choices strong {
+	color: var(--ink);
+}
+
+img.qr {
+	display: block;
+	width: 220px;
+	height: 220px;
+	margin: 8px 0 16px;
+	image-rendering: pixelated;
+	background: #fff;
+	padding: 8px;
+	border-radius: 8px;
+}
+
+.methods {
+	list-style: none;
+	margin: 12px 0 0;
+	padding: 0;
+}
+
+.methods li {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 12px;
+	padding: 12px 0;
+	border-top: 1px solid var(--line);
+}
+
+.methods .note {
+	margin: 0;
+}
+
+
+
+.setup-key {
+	word-break: normal;
+	word-spacing: 2px;
+}
+
+.warning {
+	border: 1px solid var(--accent);
+	border-left-width: 4px;
+	border-radius: 12px;
+	background: var(--card);
+	padding: 16px 20px;
+	margin: 12px 0;
+}
+
+.warning h3 {
+	font-size: 16px;
+	margin: 0 0 6px;
+}
+
+.warning p {
+	margin: 0;
+}
+
+.warning .actions {
+	margin-top: 16px;
+}
+
+
+
+
+
+#connections-error:empty,
+#security > .error:empty,
+#library-error:empty {
+	display: none;
+}
+
+/* Memories page: account bar and collapsible sections */
+
+.account-bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-top: 16px;
+}
+
+.account-bar .note {
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+
+details.section {
+	background: var(--card);
+	border: 1px solid var(--line);
+	border-radius: 12px;
+	margin-top: 12px;
+}
+
+details.section > summary {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 16px 20px;
+	cursor: pointer;
+	list-style: none;
+	font-weight: 700;
+	font-size: 17px;
+}
+
+details.section > summary::-webkit-details-marker {
+	display: none;
+}
+
+details.section > summary::before {
+	content: "";
+	width: 8px;
+	height: 8px;
+	border-right: 2px solid var(--muted);
+	border-bottom: 2px solid var(--muted);
+	transform: rotate(-45deg);
+	transition: transform 0.15s;
+	flex: none;
+}
+
+details.section[open] > summary::before {
+	transform: rotate(45deg);
+}
+
+details.section > summary:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: -2px;
+	border-radius: 12px;
+}
+
+details.section .count:not(:empty) {
+	font-weight: 600;
+	font-size: 13px;
+	color: var(--muted);
+	border: 1px solid var(--line);
+	border-radius: 999px;
+	padding: 0 8px;
+}
+
+details.section > :not(summary) {
+	margin-left: 20px;
+	margin-right: 20px;
+}
+
+details.section[open] > :last-child {
+	margin-bottom: 20px;
+}
+
+details.section > .note:first-of-type {
+	margin-top: 0;
+}
+
+#memories-section .memory {
+	background: var(--bg);
+}
+
+#memories-section #library > .toolbar:first-child {
+	margin-top: 4px;
+}

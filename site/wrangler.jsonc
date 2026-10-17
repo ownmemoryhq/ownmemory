@@ -1,0 +1,11 @@
+// ownmemory.app landing page (static, no data stored). Preview: npx wrangler deploy
+// Live: npx wrangler deploy --domain ownmemory.app --domain www.ownmemory.app (www redirects to the apex)
+{
+	"$schema": "../server/node_modules/wrangler/config-schema.json",
+	"name": "ownmemory-site",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-09-01",
+	// run_worker_first: the www → apex redirect must run before static files are served.
+	"assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": true },
+	"observability": { "enabled": true }
+}
