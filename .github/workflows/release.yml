@@ -27,5 +27,11 @@ jobs:
             echo "server/package.json says ${version}, but the release is ${TAG}." >&2
             exit 1
           fi
+          # The MCP registry entry (server.json) is published by hand after each release.
+          listed=$(node -p "require('./src/server.json').version")
+          if [ "v${listed}" != "$TAG" ]; then
+            echo "server.json says ${listed}, but the release is ${TAG}: bump it, then run mcp-publisher publish." >&2
+            exit 1
+          fi
           tar -czf "ownmemory-server-${TAG}.tar.gz" -C src/server .
           gh release upload "$TAG" "ownmemory-server-${TAG}.tar.gz" --repo "$REPO" --clobber
