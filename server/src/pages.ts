@@ -49,12 +49,20 @@ export const CLAUDE_INSTRUCTIONS =
 	"I use the OwnMemory connector as my long-term memory. At the start of every conversation, before replying, call OwnMemory's load_core_memories and follow what it says. Whenever you learn something durable about me (who I am, my preferences, decisions, projects, people in my life), save it with OwnMemory's save_memory, even if you also use your built-in memory. Search OwnMemory before answering anything that depends on my history or preferences.";
 
 /** The setup wizard: everything the owner does after deploying, in order. */
-export function homePage(origin: string, d1: boolean) {
+export function homePage(origin: string, d1: boolean, ownerCodeOk = true) {
 	const url = `${origin}/mcp`;
+	// The deploy form accepts any owner code; the server needs 12 characters or more.
+	const fixOwnerCode =
+		d1 && !ownerCodeOk
+			? `<div class="warning" role="alert">
+<h2>Fix your owner code first</h2>
+<p>This server's owner code is missing or shorter than 12 characters, so nobody can connect. In the Cloudflare dashboard, open <strong>Workers &amp; Pages</strong> → this Worker → <strong>Settings</strong> → <strong>Variables and Secrets</strong>, edit <strong>OWNER_CODE</strong>, and enter a random code of at least 12 characters from your password manager, one you use nowhere else. It takes effect within a minute; then reload this page.</p>
+</div>`
+			: "";
 	const where = d1 ? "in this server's own database, in your Cloudflare account" : "in your Google Drive";
 	return layout(
 		"Set up",
-		`<div class="card">
+		`${fixOwnerCode}<div class="card">
 <h1>Your OwnMemory server is running</h1>
 <p>It keeps what Claude learns about you ${where}, encrypted with a key only you hold. Four steps to start:</p>
 </div>
@@ -78,6 +86,7 @@ export function homePage(origin: string, d1: boolean) {
 <p>This step is required. In Claude, open Settings and paste this into <strong>Instructions for Claude</strong>:</p>
 <div class="code prose" id="instructions">${escape(CLAUDE_INSTRUCTIONS)}</div>
 <p><button type="button" class="secondary" data-copy="instructions">Copy instructions</button></p>
+<p>Then let Claude save without asking each time: in Settings → <strong>Connectors</strong>, open OwnMemory and set its tool permissions to <strong>Always allow</strong>. You can leave <strong>Delete a memory</strong> on approval, if you like to confirm deletions.</p>
 </section>
 
 <section class="card step">

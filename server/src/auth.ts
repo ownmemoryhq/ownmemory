@@ -84,7 +84,10 @@ const dropPending = (kv: KVNamespace, handle: string) => dropState(kv, "unlock",
 const expired = () =>
 	new UserFacingError("This page expired", "Go back to Claude and connect OwnMemory again. Nothing was changed.");
 
-app.get("/", (c) => htmlResponse(homePage(origin(c.env, c.req.raw), usesD1(c.env))));
+app.get("/", (c) => {
+	const ownerCodeOk = (c.env.OWNER_CODE?.trim().length ?? 0) >= 12;
+	return htmlResponse(homePage(origin(c.env, c.req.raw), usesD1(c.env), ownerCodeOk));
+});
 app.get("/privacy", (c) => htmlResponse(privacyPage(origin(c.env, c.req.raw), usesD1(c.env))));
 // The old "Download my memories" page; downloading now happens on the memories page.
 app.get("/export", (c) => c.redirect("/memories", 301));

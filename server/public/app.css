@@ -551,3 +551,12 @@ details.section > .note:first-of-type {
 #memories-section #library > .toolbar:first-child {
 	margin-top: 4px;
 }
+
+.warning + .card {
+	margin-top: 16px;
+}
+
+.warning h2 {
+	font-size: 17px;
+	margin: 0 0 6px;
+}

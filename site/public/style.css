@@ -359,3 +359,7 @@ button.button:disabled {
 .panel .warning strong {
 	color: var(--ink);
 }
+
+.small a {
+	color: var(--ink);
+}

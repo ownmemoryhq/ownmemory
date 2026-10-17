@@ -32,7 +32,10 @@
   "cloudflare": {
     "bindings": {
       "OWNER_CODE": {
-        "description": "A code only you know, **at least 12 characters**: generate one in your password manager and keep it there. You enter it once, when you first connect, to set up a passkey or an authenticator app. After that it's only used together with your authenticator code, or to reset sign-in if you lose your devices."
+        "description": "**At least 12 characters**, random: generate it in your password manager and keep it there; don't reuse a password. You enter it once, when you first connect, to set up a passkey or an authenticator app. After that it's only used with your authenticator code, or to reset sign-in if you lose your devices."
+      },
+      "STORAGE": {
+        "description": "Leave as **d1**: memories are stored, encrypted, in a database in your own Cloudflare account."
       }
     }
   },
