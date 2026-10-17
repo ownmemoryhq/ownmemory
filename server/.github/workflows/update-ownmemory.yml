@@ -1,0 +1,74 @@
+# Updates this OwnMemory server to the latest release of github.com/ownmemoryhq/ownmemory.
+#
+# Run it from this repository's Actions tab: "Update OwnMemory" → "Run workflow". It commits
+# the new version here, and Cloudflare then rebuilds and redeploys your server (about a minute).
+# Your memories, keys and settings aren't touched: they live in your Cloudflare account, not in
+# this repository. Your Worker's name and database ids in wrangler.jsonc are kept.
+#
+# This file itself isn't updated automatically (GitHub doesn't let workflows change workflows);
+# if a release changes it, the run's summary says so.
+name: Update OwnMemory
+
+on:
+  workflow_dispatch:
+  # To update automatically every Monday, remove the "#" from the next two lines.
+  # schedule:
+  #   - cron: "0 9 * * 1"
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update to the latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          UPSTREAM: ownmemoryhq/ownmemory
+        run: |
+          set -euo pipefail
+          git clone --quiet "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" current
+          cd current
+
+          release=$(curl -fsSL "https://api.github.com/repos/${UPSTREAM}/releases/latest")
+          tag=$(jq -r .tag_name <<<"$release")
+          asset=$(jq -r '.assets[] | select(.name | startswith("ownmemory-server-")) | .browser_download_url' <<<"$release" | head -n1)
+          installed=$(node -p "require('./package.json').version")
+          echo "Installed: ${installed}. Latest release: ${tag}."
+          if [ "v${installed}" = "${tag}" ]; then
+            echo "### Already up to date (${tag})" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if [ -z "$asset" ]; then
+            echo "Release ${tag} has no server package yet; try again in a few minutes." >&2
+            exit 1
+          fi
+
+          curl -fsSL "$asset" -o /tmp/server.tar.gz
+          mkdir /tmp/release
+          tar -xzf /tmp/server.tar.gz -C /tmp/release
+
+          # Keep this server's Worker name and database ids; stop if they can't be found.
+          node /tmp/release/scripts/merge-wrangler.mjs wrangler.jsonc /tmp/release/wrangler.jsonc /tmp/wrangler.jsonc
+
+          # Replace the code with the release's, except git data and this workflow.
+          rsync -a --delete --exclude .git --exclude .github --exclude wrangler.jsonc /tmp/release/ ./
+          cp /tmp/wrangler.jsonc wrangler.jsonc
+
+          if ! diff -q /tmp/release/.github/workflows/update-ownmemory.yml .github/workflows/update-ownmemory.yml >/dev/null 2>&1; then
+            echo "Note: this release has a newer version of this workflow. Replace .github/workflows/update-ownmemory.yml with the one from https://github.com/${UPSTREAM}/blob/${tag}/server/.github/workflows/update-ownmemory.yml" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          git config user.name "OwnMemory updater"
+          git config user.email "updater@ownmemory.app"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "### Nothing to change" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git commit --quiet -m "Update OwnMemory to ${tag}" -m "Release notes: https://github.com/${UPSTREAM}/releases/tag/${tag}"
+          git push --quiet origin HEAD
+          echo "### Updated to ${tag}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Cloudflare is now redeploying your server; it takes about a minute. Release notes: https://github.com/${UPSTREAM}/releases/tag/${tag}" >> "$GITHUB_STEP_SUMMARY"

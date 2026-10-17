@@ -1,0 +1,31 @@
+# Attaches the server package to each published release. The "Update OwnMemory" workflow in
+# users' copies downloads it, and GitHub's download count for it is how we see roughly how many
+# servers update, without the servers ever contacting us.
+name: Release package
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build and attach ownmemory-server-<tag>.tar.gz
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          git clone --quiet --depth 1 --branch "$TAG" "https://github.com/${REPO}.git" src
+          version=$(node -p "require('./src/server/package.json').version")
+          if [ "v${version}" != "$TAG" ]; then
+            echo "server/package.json says ${version}, but the release is ${TAG}." >&2
+            exit 1
+          fi
+          tar -czf "ownmemory-server-${TAG}.tar.gz" -C src/server .
+          gh release upload "$TAG" "ownmemory-server-${TAG}.tar.gz" --repo "$REPO" --clobber

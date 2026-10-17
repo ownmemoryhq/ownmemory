@@ -56,7 +56,7 @@ export function homePage(origin: string, d1: boolean, ownerCodeOk = true) {
 		d1 && !ownerCodeOk
 			? `<div class="warning" role="alert">
 <h2>Fix your owner code first</h2>
-<p>This server's owner code is missing or shorter than 12 characters, so nobody can connect. In the Cloudflare dashboard, open <strong>Workers &amp; Pages</strong> → this Worker → <strong>Settings</strong> → <strong>Variables and Secrets</strong>, edit <strong>OWNER_CODE</strong>, and enter a random code of at least 12 characters from your password manager, one you use nowhere else. It takes effect within a minute; then reload this page.</p>
+<p>This server's owner code is missing or shorter than 12 characters, so nobody can connect. In the Cloudflare dashboard, open <strong>Build</strong> → <strong>Compute</strong> → <strong>Workers &amp; Pages</strong> → this Worker → <strong>Settings</strong> → <strong>Variables and Secrets</strong>, edit <strong>OWNER_CODE</strong>, and enter a random code of at least 12 characters from your password manager, one you use nowhere else. It takes effect within a minute; then reload this page.</p>
 </div>`
 			: "";
 	const where = d1 ? "in this server's own database, in your Cloudflare account" : "in your Google Drive";
@@ -124,6 +124,7 @@ ${accesses}
 ${sharing}
 <h2>Deleting your data</h2>
 ${deleting}
+<p>Step by step, including handing your memories back to Claude: <a href="https://github.com/ownmemoryhq/ownmemory/blob/main/docs/setup.md#stop-using-ownmemory">Stop using OwnMemory</a>.</p>
 <h2>Contact</h2>
 <p>${d1 ? "Contact the owner of this server." : "Use the support email shown on Google's sign-in screen for this app."}</p>
 </div>`,

@@ -6,7 +6,7 @@ Claude calls a remote MCP server running in your own Cloudflare account. The ser
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/ownmemoryhq/ownmemory/tree/main/server)
 
-**Get started:** have a free Cloudflare account ([sign up](https://dash.cloudflare.com/sign-up) first if you don't), click the button above, choose a random owner code of 12+ characters, then open your server's address and follow its four setup steps. About 5 minutes, on a free Cloudflare account. Full guide, including Google Drive storage: [docs/setup.md](docs/setup.md).
+**Get started:** create a free Cloudflare account and connect GitHub to it first ([steps](docs/setup.md#one-click-setup)), then click the button above, choose a random owner code of 12+ characters, and open your server's address to follow its four setup steps. About 5 minutes, on a free Cloudflare account. Full guide, including Google Drive storage: [docs/setup.md](docs/setup.md).
 
 **Status:** early (v0.2). Works today with Claude on the web, iPhone and Android, and with MCP clients such as Claude Code, Cursor, Gemini CLI and Codex.
 
