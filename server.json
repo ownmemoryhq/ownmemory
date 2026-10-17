@@ -1,0 +1,21 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "app.ownmemory/ownmemory",
+  "title": "OwnMemory",
+  "description": "Encrypted memory for Claude, on a server you deploy to your own Cloudflare account.",
+  "version": "0.2.1",
+  "websiteUrl": "https://ownmemory.app",
+  "repository": { "url": "https://github.com/ownmemoryhq/ownmemory", "source": "github" },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://{server_address}/mcp",
+      "variables": {
+        "server_address": {
+          "description": "Your own OwnMemory server's address, e.g. ownmemory.your-name.workers.dev. Deploy one first: https://github.com/ownmemoryhq/ownmemory#readme",
+          "isRequired": true
+        }
+      }
+    }
+  ]
+}
