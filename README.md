@@ -24,6 +24,8 @@ Claude calls a remote MCP server running in your own Cloudflare account. The ser
 
 The one unavoidable exposure: the server and Anthropic see a memory's text while a save or search runs, because Claude sends plain text. Running the server yourself is the safeguard.
 
+Who else could get at your memories, person by person, and how to keep them out: [docs/security-model.md](docs/security-model.md).
+
 ## Tools Claude gets
 
 | Tool | What it does |
@@ -48,7 +50,7 @@ The one unavoidable exposure: the server and Anthropic see a memory's text while
 | `site/` | The ownmemory.app landing page and [the decrypt page](https://ownmemory.app/decrypt): static files, no data collected |
 | `server/scripts/decrypt.mjs` | Local export to plain Markdown |
 | `server/test/` | Unit tests (`npm test`) and a recall evaluation against real embeddings (`npm run eval`) |
-| `docs/` | Setup guide and the key-flow diagram |
+| `docs/` | Setup guide, "Who can read your memories" and the key-flow diagram |
 | `design/logo/` | Logo sources from the design canvas and PNG/SVG exports |
 
 ## Contributing, security and license

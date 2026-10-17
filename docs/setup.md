@@ -43,7 +43,7 @@ Open your server's address. It walks you through the rest, with copy buttons:
 1. **Add it to Claude:** on claude.ai, Settings → Connectors → Add custom connector, with your address plus `/mcp`. Add it on the web first; it then appears in the Claude phone apps.
 2. **Connect:** enter your owner code, then protect the server with a **passkey** (Face ID, a fingerprint, Windows Hello or your phone) or an **authenticator app**. Then choose a passphrase (at least 10 characters) and save the recovery key it shows you. It's shown once.
 
-   From then on the owner code alone no longer signs in, so nobody can sit and guess it: you sign in with your passkey, or with the owner code plus the 6-digit code from your authenticator app. Add more passkeys (one per device, or one in your password manager) on the memories page.
+   Do this right after deploying: until your first sign-in, the owner code alone signs in. From then on the owner code alone no longer signs in, so nobody can sit and guess it: you sign in with your passkey, or with the owner code plus the 6-digit code from your authenticator app. Add more passkeys (one per device, or one in your password manager) on the memories page.
 3. **Tell Claude to use it (required):** paste the text from the setup page into **Instructions for Claude** in Claude's settings. Without it, Claude ignores the connector. Then, in Settings → Connectors → OwnMemory, set the tool permissions to **Always allow**, so Claude doesn't ask before every save. Leave **Delete a memory** on approval if you like to confirm deletions.
 4. **Bring over what Claude already knows:** in a new chat, say "Save everything you remember about me to OwnMemory."
 

@@ -10,6 +10,8 @@ import { ownerCodeHash } from "./web";
 // are never written to storage; they exist only while a request runs.
 const mcp = createMcpHandler(createServer, { route: "/mcp" });
 
+const IDLE_LIMIT = 90 * 86_400;
+
 function buildProvider(origin: string) {
 	return new OAuthProvider<Env>({
 		apiRoute: "/mcp",
@@ -20,6 +22,10 @@ function buildProvider(origin: string) {
 		clientRegistrationEndpoint: "/register",
 		clientIdMetadataDocumentEnabled: true,
 		accessTokenTTL: 3600,
+		// A connection lasts while it's used and ends after 90 idle days, taking its copy of the
+		// memory key with it. (The library's default ends every connection 30 days in.)
+		refreshTokenTTL: IDLE_LIMIT,
+		refreshTokenIdleTTL: IDLE_LIMIT,
 		resourceMetadata: { resource: `${origin}/mcp`, resource_name: "OwnMemory" },
 		// Keep the Google access token in the grant fresh whenever Claude refreshes its token.
 		tokenExchangeCallback: async ({ grantType, props, env }) => {
