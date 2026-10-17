@@ -9,7 +9,7 @@
 // Edits leave the search index alone: an edited memory's "updated" time no longer matches its
 // embedding, so the next search recomputes it, and deleted memories are pruned the same way.
 import type { GrantSummary, OAuthHelpers } from "@cloudflare/workers-oauth-provider";
-import { Hono } from "hono";
+import { type Context, Hono } from "hono";
 import { assertKeyInfo } from "../public/keys.js";
 import { type GateState, gateRoutes, manageRoutes } from "./gate";
 import { DRIVE_SCOPE, Drive, DriveError, exchangeCode, googleAuthorizeUrl, readIdToken } from "./google";
@@ -37,6 +37,7 @@ const SESSION_TTL = 3600;
 const SIGNIN_COOKIE = "__Host-ownmemory-signin";
 const SIGNIN_TTL = 600;
 const MAX_FILE = 100_000;
+const CONFIRM_WINDOW = 10 * 60_000; // how long a confirmation allows changing sign-in methods
 
 interface Session {
 	storage: "d1" | "drive";
@@ -48,6 +49,9 @@ interface Session {
 	accessToken?: string;
 	/** A passkey challenge or authenticator secret while adding one on the page. */
 	gate?: GateState;
+	/** D1: confirming it's the owner before changing sign-in methods, and when that passed. */
+	confirm?: GateState;
+	confirmedAt?: number;
 	/** D1: the owner code the session was opened under; changing OWNER_CODE ends it. */
 	ownerCode?: string | null;
 }
@@ -127,6 +131,8 @@ gateRoutes(memoriesApp, "/gate", async (c, _body, starting) => {
 				email: "",
 				expiresAt: Date.now() + SESSION_TTL * 1000,
 				ownerCode: await ownerCodeHash(c.env),
+				// Signing in is the same check, so it allows changing sign-in methods for a while too.
+				confirmedAt: Date.now(),
 			};
 			c.header("Set-Cookie", await startSession(c.env, session), { append: true });
 			return c.json({ ok: true });
@@ -134,16 +140,41 @@ gateRoutes(memoriesApp, "/gate", async (c, _body, starting) => {
 	};
 });
 
-// D1: add and remove passkeys and the authenticator app while signed in.
-manageRoutes(memoriesApp, "/security", async (c) => {
+/** The signed-in session and a way to save changes to it, or null. */
+async function openSession(c: Context<{ Bindings: Env }>) {
 	if (!usesD1(c.env)) return null;
 	const handle = readCookie(c.req.raw, SESSION_COOKIE);
-	if (!handle) return null;
-	const session = await loadSession(c.env, c.req.raw).catch(() => null);
-	if (!session) return null;
+	const session = handle ? await loadSession(c.env, c.req.raw).catch(() => null) : null;
+	if (!handle || !session) return null;
+	const save = (next: Session) => sealState(c.env.OAUTH_KV, "session", handle, next, (next.expiresAt - Date.now()) / 1000);
+	return { session, save };
+}
+
+// D1: before changing sign-in methods, the owner confirms with a passkey or codes again: the
+// same sign-in step, with the same limit on wrong codes.
+gateRoutes(memoriesApp, "/security/confirm", async (c) => {
+	const open = await openSession(c);
+	if (!open) return null;
+	const { session, save } = open;
+	return {
+		state: session.confirm ?? {},
+		save: (confirm) => save({ ...session, confirm }),
+		pass: async () => {
+			await save({ ...session, confirm: undefined, confirmedAt: Date.now() });
+			return c.json({ ok: true });
+		},
+	};
+});
+
+// D1: add and remove passkeys and the authenticator app while signed in.
+manageRoutes(memoriesApp, "/security", async (c) => {
+	const open = await openSession(c);
+	if (!open) return null;
+	const { session, save } = open;
 	return {
 		state: session.gate ?? {},
-		save: (gate) => sealState(c.env.OAUTH_KV, "session", handle, { ...session, gate }, (session.expiresAt - Date.now()) / 1000),
+		save: (gate) => save({ ...session, gate }),
+		confirmed: !!session.confirmedAt && Date.now() - session.confirmedAt < CONFIRM_WINDOW,
 	};
 });
 

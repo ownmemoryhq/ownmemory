@@ -64,6 +64,33 @@ $("create-form")?.addEventListener("submit", async (event) => {
 	}
 });
 
+// A text file with the key and how to use it, for printing or a password manager.
+$("download-recovery")?.addEventListener("click", () => {
+	const text = [
+		"OwnMemory recovery key",
+		"",
+		$("recovery-code").textContent,
+		"",
+		`Server: ${location.origin}`,
+		`Created: ${new Date().toISOString().slice(0, 10)}`,
+		"",
+		"If you forget your passphrase: connect OwnMemory again from Claude, choose",
+		'"Forgot your passphrase? Use your recovery key", enter this key and choose a new',
+		"passphrase. It also unlocks a downloaded copy at https://ownmemory.app/decrypt.",
+		"",
+		"Anyone with this key who can sign in to your server, or who has a copy of your",
+		"encrypted files, can read your memories. Keep it somewhere safe, such as your",
+		"password manager or a printout, and delete other copies of this file.",
+		"",
+	].join("\n");
+	const a = document.createElement("a");
+	a.href = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+	a.download = "ownmemory-recovery-key.txt";
+	a.click();
+	setTimeout(() => URL.revokeObjectURL(a.href), 10_000);
+	$("download-recovery").textContent = "Downloaded";
+});
+
 $("recovery-saved")?.addEventListener("change", (event) => {
 	$("recovery-continue").disabled = !event.currentTarget.checked;
 });

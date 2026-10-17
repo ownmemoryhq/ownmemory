@@ -3,7 +3,7 @@
   "name": "app.ownmemory/ownmemory",
   "title": "OwnMemory",
   "description": "Encrypted memory for Claude, on a server you deploy to your own Cloudflare account.",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "websiteUrl": "https://ownmemory.app",
   "repository": { "url": "https://github.com/ownmemoryhq/ownmemory", "source": "github" },
   "remotes": [

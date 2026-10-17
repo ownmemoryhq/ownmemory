@@ -207,31 +207,39 @@ export function gateRoutes(app: Hono<any>, prefix: string, loader: GateLoader) {
 export interface ManageContext {
 	state: GateState;
 	save(state: GateState): Promise<void>;
+	/** The owner confirmed with a passkey or codes in the last few minutes (see memories.ts). */
+	confirmed: boolean;
 }
 export type ManageLoader = (c: AnyContext) => Promise<ManageContext | null>;
 
-/** Lists, adds and removes sign-in methods, for a signed-in owner (the memories page). */
+/**
+ * Lists, adds and removes sign-in methods, for a signed-in owner (the memories page). Every
+ * change needs a fresh confirmation, so a session left open can't plant a passkey of its own.
+ */
 export function manageRoutes(app: Hono<any>, prefix: string, loader: ManageLoader) {
 	async function begin(c: AnyContext, json = true) {
 		const body = json ? await readBody(c) : {};
 		if (body instanceof Response) return body;
 		const ctx = await loader(c);
 		if (!ctx) return c.json({ error: "Your session ended. Sign in again.", signIn: true }, 401);
+		if (json && !ctx.confirmed) return c.json({ error: "Confirm it's you first.", confirm: true }, 403);
 		const env = c.env as Env;
 		const { methods, fileId } = await loadMethods(env);
 		if (!hasMethods(methods)) return c.json({ error: "Your session ended. Sign in again.", signIn: true }, 401);
 		return { body, ctx, env, methods, fileId, rp: relyingParty(origin(c)) };
 	}
 
-	const summary = (m: SignInMethods) => ({
+	// confirmed: whether changes are allowed right now, so the page can ask first.
+	const summary = (m: SignInMethods, confirmed: boolean) => ({
 		passkeys: m.passkeys.map(({ id, name, created, lastUsed }) => ({ id, name, created, lastUsed })),
 		totp: m.totp ? { created: m.totp.created } : null,
+		confirmed,
 	});
 
 	app.get(prefix, async (c) => {
 		const s = await begin(c, false);
 		if (s instanceof Response) return s;
-		return c.json(summary(s.methods));
+		return c.json(summary(s.methods, s.ctx.confirmed));
 	});
 
 	app.post(`${prefix}/passkey/options`, async (c) => {
@@ -252,7 +260,7 @@ export function manageRoutes(app: Hono<any>, prefix: string, loader: ManageLoade
 		if (!passkey) return c.json({ error: "The passkey couldn't be added. Try again." }, 400);
 		const next = { ...s.methods, passkeys: [...s.methods.passkeys.filter((p) => p.id !== passkey.id), passkey] };
 		await saveMethods(s.env, next, s.fileId);
-		return c.json(summary(next));
+		return c.json(summary(next, s.ctx.confirmed));
 	});
 
 	app.delete(`${prefix}/passkey/:id`, async (c) => {
@@ -264,7 +272,7 @@ export function manageRoutes(app: Hono<any>, prefix: string, loader: ManageLoade
 		}
 		const next = { ...s.methods, passkeys };
 		await saveMethods(s.env, next, s.fileId);
-		return c.json(summary(next));
+		return c.json(summary(next, s.ctx.confirmed));
 	});
 
 	app.post(`${prefix}/totp`, async (c) => {
@@ -287,7 +295,7 @@ export function manageRoutes(app: Hono<any>, prefix: string, loader: ManageLoade
 		await s.ctx.save({ ...s.ctx.state, totpSecret: undefined });
 		const next = { ...s.methods, totp: { secret, created: new Date().toISOString(), lastStep: step } };
 		await saveMethods(s.env, next, s.fileId);
-		return c.json(summary(next));
+		return c.json(summary(next, s.ctx.confirmed));
 	});
 
 	app.delete(`${prefix}/totp`, async (c) => {
@@ -298,6 +306,6 @@ export function manageRoutes(app: Hono<any>, prefix: string, loader: ManageLoade
 		}
 		const { totp: _, ...next } = s.methods;
 		await saveMethods(s.env, next, s.fileId);
-		return c.json(summary(next));
+		return c.json(summary(next, s.ctx.confirmed));
 	});
 }

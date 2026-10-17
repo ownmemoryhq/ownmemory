@@ -281,8 +281,8 @@ export function unlockPage({ mode, email, handle, keyinfo }: UnlockPageOptions) 
 <h1>Save your recovery key</h1>
 <p>If you forget your passphrase, this is the only way back into your memories. Nobody else can recover them, including the server's owner.</p>
 <div class="code" id="recovery-code"></div>
-<p><button type="button" class="secondary" id="copy-recovery">Copy</button></p>
-<p class="note">Keep it in your password manager or print it. It's shown only once.</p>
+<p><button type="button" class="secondary" id="copy-recovery">Copy</button> <button type="button" class="secondary" id="download-recovery">Download</button></p>
+<p class="note">Keep it in your password manager, or print the downloaded file and delete it from your computer. It's shown only once.</p>
 <form id="recovery-form">
 <label class="check"><input type="checkbox" id="recovery-saved"> I saved my recovery key somewhere safe</label>
 <div class="actions"><button type="submit" id="recovery-continue" disabled>Continue</button></div>

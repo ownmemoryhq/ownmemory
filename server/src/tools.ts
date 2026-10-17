@@ -191,7 +191,7 @@ function modeBriefing(settings: Settings, count: number, now: Date): { lines: st
 const category = z.enum(CATEGORIES);
 
 export function createServer() {
-	const server = new McpServer({ name: "OwnMemory", version: "0.2.1" }, { instructions: INSTRUCTIONS });
+	const server = new McpServer({ name: "OwnMemory", version: "0.2.2" }, { instructions: INSTRUCTIONS });
 
 	server.registerTool(
 		"load_core_memories",

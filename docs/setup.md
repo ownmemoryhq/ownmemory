@@ -41,7 +41,7 @@ If `wrangler.jsonc` already lists `"id"` values for `OAUTH_KV` or `DB`, they bel
 Open your server's address. It walks you through the rest, with copy buttons:
 
 1. **Add it to Claude:** on claude.ai, Settings → Connectors → Add custom connector, with your address plus `/mcp`. Add it on the web first; it then appears in the Claude phone apps.
-2. **Connect:** enter your owner code, then protect the server with a **passkey** (Face ID, a fingerprint, Windows Hello or your phone) or an **authenticator app**. Then choose a passphrase (at least 10 characters) and save the recovery key it shows you. It's shown once.
+2. **Connect:** enter your owner code, then protect the server with a **passkey** (Face ID, a fingerprint, Windows Hello or your phone) or an **authenticator app**. Then choose a passphrase (at least 10 characters) and save the recovery key it shows you: copy it into your password manager, or download it as a text file to print. It's shown once.
 
    Do this right after deploying: until your first sign-in, the owner code alone signs in. From then on the owner code alone no longer signs in, so nobody can sit and guess it: you sign in with your passkey, or with the owner code plus the 6-digit code from your authenticator app. Add more passkeys (one per device, or one in your password manager) on the memories page.
 3. **Tell Claude to use it (required):** paste the text from the setup page into **Instructions for Claude** in Claude's settings. Without it, Claude ignores the connector. Then, in Settings → Connectors → OwnMemory, set the tool permissions to **Always allow**, so Claude doesn't ask before every save. Leave **Delete a memory** on approval if you like to confirm deletions.
@@ -130,7 +130,7 @@ Then try it: tell Claude something about yourself, start a new chat, and ask wha
 | See, search, fix or add memories | Open `/memories` on your server. Sign in with your passkey or codes (Drive setup: with Google), then enter your passphrase. Memories are decrypted and re-encrypted in your browser; the session ends after an hour, and the page locks after 15 idle minutes |
 | Read or export everything | On `/memories`, click **Download all**: a zip of Markdown files, decrypted in your browser |
 | See or disconnect connected apps | The **Connected apps** card on `/memories` lists each app connected to your server (Claude on the web, Claude Code…). **Disconnect** ends it within about a minute; the app has to sign in again. Apps otherwise stay connected until you remove OwnMemory in them |
-| Add or remove a passkey or authenticator app | One-click setup: the **Sign-in methods** card at the bottom of `/memories`. The server always keeps at least one |
+| Add or remove a passkey or authenticator app | One-click setup: the **Sign-in methods** card at the bottom of `/memories`. Changes need a sign-in or confirmation (passkey or codes) within the last 10 minutes; otherwise the card asks you to confirm first. The server always keeps at least one |
 | Change your passphrase | Disconnect and reconnect the connector, choose "Forgot your passphrase? Use your recovery key", and set a new one |
 | Cut off access | Disconnect the connector in Claude (deletes the server's only copy of your key). Drive setup: also remove OwnMemory at [myaccount.google.com/permissions](https://myaccount.google.com/permissions) |
 

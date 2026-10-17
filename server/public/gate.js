@@ -85,6 +85,7 @@ function el(tag, props = {}, ...children) {
 }
 
 export class SignInNeeded extends Error {}
+class ConfirmNeeded extends Error {}
 
 async function post(url, body) {
 	const response = await fetch(url, {
@@ -115,14 +116,16 @@ async function busy(button, label, error, action) {
 	}
 }
 
-/** The QR code, setup key and confirmation field for adding an authenticator app. */
-function totpSetup({ secret, uri }, onCode) {
+/** The QR code, setup key and confirmation field for adding an authenticator app; onCancel adds a Cancel button. */
+function totpSetup({ secret, uri }, onCode, onCancel) {
 	const qr = qrcode(0, "M");
 	qr.addData(uri);
 	qr.make();
 	const code = el("input", { id: "totp-confirm", name: "code", type: "text", inputMode: "numeric", autocomplete: "one-time-code", maxLength: 6, required: true });
 	const error = el("p", { class: "error", role: "alert" });
 	const submit = el("button", { type: "submit" }, "Confirm");
+	const cancel = onCancel ? el("button", { type: "button", class: "secondary" }, "Cancel") : null;
+	cancel?.addEventListener("click", onCancel);
 	const form = el(
 		"form",
 		{ noValidate: true },
@@ -133,7 +136,7 @@ function totpSetup({ secret, uri }, onCode) {
 		el("label", { htmlFor: "totp-confirm" }, "Then enter the 6-digit code it shows"),
 		code,
 		error,
-		el("div", { class: "actions" }, submit),
+		el("div", { class: "actions" }, submit, cancel),
 	);
 	form.addEventListener("submit", (event) => {
 		event.preventDefault();
@@ -144,6 +147,24 @@ function totpSetup({ secret, uri }, onCode) {
 }
 
 // ---- Signing in --------------------------------------------------------------------------------
+
+/** A link that opens the way back in: a new owner code, set in the Cloudflare dashboard. */
+function resetHelp(label, lead = "") {
+	const toggle = el("button", { type: "button", class: "link" }, label);
+	const help = el(
+		"p",
+		{ class: "note", hidden: true },
+		`${lead}To get back in, set a new owner code in the Cloudflare dashboard: Build → Compute → Workers & Pages → this server's Worker → Settings → Variables and Secrets → OWNER_CODE. `,
+		"That resets sign-in: your passkeys and authenticator app stop working and connected apps are disconnected. Your memories and passphrase stay as they are. Then sign in with the new code and set up a passkey again. ",
+		el("a", { href: "https://github.com/ownmemoryhq/ownmemory/blob/main/docs/setup.md#troubleshooting", target: "_blank", rel: "noopener" }, "Step by step"),
+	);
+	toggle.addEventListener("click", () => {
+		help.hidden = !help.hidden;
+	});
+	return el("div", {}, el("p", {}, toggle), help);
+}
+
+const forgotOwnerCode = () => resetHelp("Forgot your owner code?", "Your owner code can't be looked up, even in Cloudflare. ");
 
 /**
  * Shows the sign-in step in panel and resolves with the server's answer once it passes.
@@ -160,7 +181,7 @@ export function signIn(panel, base, extra = {}) {
 		const guard = (fn) => (...args) => fn(...args).catch(reject);
 
 		// Claimed server: owner code plus authenticator code.
-		function codesForm(extraNote) {
+		function codesForm(extraNote = forgotOwnerCode()) {
 			const owner = el("input", { id: "gate-owner", name: "code", type: "password", autocomplete: "current-password", required: true });
 			const totp = el("input", { id: "gate-totp", name: "totp", type: "text", inputMode: "numeric", autocomplete: "one-time-code", maxLength: 6, required: true });
 			const error = el("p", { class: "error", role: "alert" });
@@ -227,6 +248,7 @@ export function signIn(panel, base, extra = {}) {
 					other.addEventListener("click", () => render(el("h1", {}, "Sign in"), codesForm()));
 					parts.push(el("p", {}, other));
 				}
+				parts.push(resetHelp("Lost your passkey?"));
 			} else if (start.totp) {
 				parts.push(el("p", {}, "Enter your owner code and the 6-digit code from your authenticator app."), codesForm());
 			} else {
@@ -256,6 +278,7 @@ export function signIn(panel, base, extra = {}) {
 				el("h1", {}, "Enter your owner code"),
 				el("p", {}, "The code you chose when you deployed this server. You need it once, to protect the server with a passkey or an authenticator app."),
 				form,
+				forgotOwnerCode(),
 			);
 		}
 
@@ -285,7 +308,11 @@ export function signIn(panel, base, extra = {}) {
 						const setup = await call("/enroll/totp");
 						render(
 							el("h1", {}, "Add an authenticator app"),
-							totpSetup(setup, async (code) => done(await call("/enroll/totp/confirm", { code }))),
+							totpSetup(
+								setup,
+								async (code) => done(await call("/enroll/totp/confirm", { code })),
+								() => showEnroll(options),
+							),
 							el(
 								"p",
 								{ class: "note" },
@@ -334,6 +361,7 @@ export async function manage(container, onSignInNeeded, onCount) {
 		});
 		const result = await response.json().catch(() => ({}));
 		if (response.status === 401 && result.signIn) throw new SignInNeeded(result.error);
+		if (response.status === 403 && result.confirm) throw new ConfirmNeeded(result.error);
 		if (!response.ok) throw new Error(result.error || "Something went wrong. Try again.");
 		return result;
 	}
@@ -344,17 +372,41 @@ export async function manage(container, onSignInNeeded, onCount) {
 			await fn(...args);
 		} catch (e) {
 			if (e instanceof SignInNeeded) return onSignInNeeded();
+			if (e instanceof ConfirmNeeded) return confirmFirst();
 			error.textContent = passkeyError(e).message || String(e);
 		}
 	};
 
-	function render(methods, extra) {
+	// Changes need a fresh passkey or codes. Afterwards the owner clicks again: browsers only
+	// let a page create a passkey straight after a click.
+	async function confirmFirst() {
+		const panel = el("div");
+		const cancel = el("button", { type: "button", class: "link" }, "Cancel");
+		cancel.addEventListener("click", run(async () => render(await request("GET"))));
+		container.replaceChildren(
+			container.dataset.bare ? "" : el("h2", {}, "Sign-in methods"),
+			el("p", {}, "Before changing how you sign in, confirm it's you."),
+			panel,
+			el("p", {}, cancel),
+		);
+		try {
+			await signIn(panel, `${base}/confirm`);
+			render(await request("GET"), null, "Confirmed. For the next 10 minutes you can add or remove sign-in methods.");
+		} catch (e) {
+			if (e instanceof SignInNeeded) return onSignInNeeded();
+			panel.replaceChildren(el("p", { class: "error" }, e.message || String(e)));
+		}
+	}
+
+	function render(methods, extra, notice) {
+		// Confirm first, so a removal's "are you sure?" comes once, right before it happens.
+		const change = (fn) => run(async () => (methods.confirmed ? fn() : confirmFirst()));
 		const list = el("ul", { class: "methods" });
 		for (const p of methods.passkeys) {
 			const remove = el("button", { type: "button", class: "link" }, "Remove");
 			remove.addEventListener(
 				"click",
-				run(async () => {
+				change(async () => {
 					if (!confirm(`Remove the passkey "${p.name}"? You won't be able to sign in with it any more.`)) return;
 					render(await request("DELETE", `/passkey/${encodeURIComponent(p.id)}`, {}));
 				}),
@@ -367,7 +419,7 @@ export async function manage(container, onSignInNeeded, onCount) {
 			const remove = el("button", { type: "button", class: "link" }, "Remove");
 			remove.addEventListener(
 				"click",
-				run(async () => {
+				change(async () => {
 					if (!confirm("Remove the authenticator app? You'll sign in with a passkey only.")) return;
 					render(await request("DELETE", "/totp", {}));
 				}),
@@ -379,7 +431,7 @@ export async function manage(container, onSignInNeeded, onCount) {
 		addPasskey.disabled = !passkeysSupported();
 		addPasskey.addEventListener(
 			"click",
-			run(async () => {
+			change(async () => {
 				const options = await request("POST", "/passkey/options", {});
 				let response;
 				try {
@@ -393,9 +445,16 @@ export async function manage(container, onSignInNeeded, onCount) {
 		const addTotp = el("button", { type: "button", class: "secondary" }, methods.totp ? "Replace authenticator app" : "Add an authenticator app");
 		addTotp.addEventListener(
 			"click",
-			run(async () => {
+			change(async () => {
 				const setup = await request("POST", "/totp", {});
-				render(methods, totpSetup(setup, async (code) => render(await request("POST", "/totp/confirm", { code }))));
+				render(
+					methods,
+					totpSetup(
+						setup,
+						async (code) => render(await request("POST", "/totp/confirm", { code })),
+						() => render(methods),
+					),
+				);
 			}),
 		);
 
@@ -403,6 +462,7 @@ export async function manage(container, onSignInNeeded, onCount) {
 		const parts = [
 			container.dataset.bare ? null : el("h2", {}, "Sign-in methods"),
 			el("p", { class: "note" }, "How you sign in to this server, before your passphrase. Add a passkey on each device you use, or one in your password manager."),
+			notice ? el("p", { class: "note", role: "status" }, notice) : null,
 			list,
 			error,
 			extra ?? el("div", { class: "actions" }, addPasskey, addTotp),
